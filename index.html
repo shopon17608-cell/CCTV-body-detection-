@@ -11,328 +11,242 @@
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#080f1c;color:#f8fafc;font-family:Arial,"Noto Sans Bengali",sans-serif}
-header{background:#111e32;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #263b58;position:sticky;top:0;z-index:5}
-.logo{font-size:18px;font-weight:800;color:#60a5fa}.online{font-size:11px;color:#4ade80}
-.container{max-width:1100px;margin:auto;padding:15px}
-.card{background:#122239;border:1px solid #293e5c;border-radius:14px;padding:17px;margin-bottom:15px}
-h2{font-size:19px;margin:0 0 12px}h3{font-size:16px;margin:9px 0}
-p{line-height:1.55}.muted{color:#a9bbd0;font-size:13px}
+*{box-sizing:border-box}body{margin:0;background:#080f1c;color:#f8fafc;font-family:Arial,"Noto Sans Bengali",sans-serif}
+header{background:#111e32;padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #263b58;position:sticky;top:0;z-index:10}
+.logo{font-size:17px;font-weight:800;color:#60a5fa}.topright{font-size:12px;color:#4ade80}
+.container{max-width:1100px;margin:auto;padding:15px}.card{background:#122239;border:1px solid #293e5c;border-radius:14px;padding:17px;margin-bottom:15px}
+h2{font-size:19px;margin:0 0 12px}h3{font-size:15px;margin:8px 0}p{line-height:1.55}.muted{color:#a9bbd0;font-size:13px}
 button{background:#2563eb;color:white;border:0;padding:11px 14px;border-radius:8px;margin:4px 3px 4px 0;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.5;cursor:not-allowed}.green{background:#059669}.gray{background:#475569}.google{background:white;color:#222}.red{background:#b91c1c}
+button:disabled{opacity:.45;cursor:not-allowed}.green{background:#059669}.gray{background:#475569}.google{background:#fff;color:#222}.red{background:#b91c1c}
 input,select{width:100%;padding:12px;background:#091525;color:white;border:1px solid #40536b;border-radius:8px;margin:7px 0 13px}
-label{font-size:13px;color:#cbd5e1}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px}
-.camera,.feature{background:#091525;border:1px solid #344b68;border-radius:11px;padding:15px;text-align:center}
-.camicon{font-size:30px}.camstatus{font-size:12px;color:#fbbf24}.feature p{margin:7px 0}
-.hidden{display:none!important}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.row>*{flex:1}
+label{font-size:13px;color:#cbd5e1}.hidden{display:none!important}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px}
+.camera,.feature{background:#091525;border:1px solid #344b68;border-radius:11px;padding:14px;text-align:center;min-width:0}
+.camera .camicon,.feature .camicon{font-size:28px}.camstatus{font-size:12px;color:#fbbf24}.success{color:#4ade80}.warning{color:#fbbf24}.danger{color:#f87171}
 .notice{background:#0b1a2d;border-left:3px solid #60a5fa;padding:11px;border-radius:7px;font-size:13px;color:#cbd5e1;line-height:1.55}
-.success{color:#4ade80}.warning{color:#fbbf24}.danger{color:#f87171}
-#reader{max-width:400px;margin:12px auto;overflow:hidden;border-radius:10px;background:#fff}
-#reader video{max-width:100%!important}
+#reader{max-width:400px;margin:12px auto;overflow:hidden;border-radius:10px;background:#fff}#reader video{max-width:100%!important}
 #qrResult{display:none;background:#091525;padding:12px;border-radius:9px;overflow-wrap:anywhere}
 .video-wrap{position:relative;background:#020617;border-radius:12px;overflow:hidden;min-height:160px}
-#webcam,#poseCanvas{display:block;width:100%;height:auto;max-height:520px;object-fit:contain}
-#poseCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.statusline{font-size:13px;color:#cbd5e1;margin:8px 0}
+#webcam{display:block;width:100%;max-height:500px;object-fit:contain}#poseCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.statusline{font-size:13px;color:#cbd5e1}.camera-actions{margin-top:8px}.camera-actions button{font-size:12px;padding:8px}
+.authbox{max-width:440px;margin:5vh auto}.brandmark{text-align:center;font-size:42px;color:#60a5fa}.authbox h1{text-align:center;font-size:22px}.authbox .muted{text-align:center}
 footer{text-align:center;padding:22px;color:#8094ac;font-size:12px}
-a{color:#93c5fd}
 </style>
 </head>
 <body>
 <header>
  <div class="logo">◉ CCTV BODY DETECTION</div>
- <div class="online" id="topStatus">● SYSTEM READY</div>
+ <div class="topright" id="topStatus">● SECURE LOGIN</div>
 </header>
-<div class="container">
 
-<section class="card">
- <h2>Smart CCTV AI Portal</h2>
- <p class="muted">মানুষের উপস্থিতি, শরীরের ভঙ্গি এবং নড়াচড়া পর্যবেক্ষণের ড্যাশবোর্ড।</p>
- <div class="row">
-  <button class="green" onclick="openScanner()">📷 Scan DMSS QR</button>
-  <button onclick="showPanel('authPanel')">🔐 Account</button>
-  <button class="gray" onclick="openDMSS()">📱 Open DMSS</button>
- </div>
- <p class="muted" id="userState">আপনি এখনো লগইন করেননি।</p>
-</section>
+<!-- Login is the only screen shown before authentication -->
+<main id="loginScreen" class="container">
+ <section class="card authbox">
+  <div class="brandmark">◉</div>
+  <h1>CCTV Body Detection</h1>
+  <p class="muted">Secure Camera Monitoring & AI Movement Analysis</p>
+  <h2>Account Login</h2>
+  <label>Email Address</label><input id="email" type="email" autocomplete="username" placeholder="আপনার ইমেইল">
+  <label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="পাসওয়ার্ড">
+  <button style="width:100%" onclick="emailLogin()">Login</button>
+  <button class="green" style="width:100%" onclick="emailRegister()">Create Account</button>
+  <button class="google" style="width:100%" onclick="googleLogin()">G Continue with Google</button>
+  <button class="gray" style="width:100%" onclick="resetPassword()">Forgot Password?</button>
+  <p id="authMessage" class="statusline" aria-live="polite"></p>
+  <p class="muted">এটি আপনার CCTV ওয়েবসাইটের Firebase অ্যাকাউন্ট। DMSS-এর পাসওয়ার্ড এখানে দেবেন না।</p>
+ </section>
+</main>
 
-<section class="card hidden" id="authPanel">
- <h2>Account Login / Register</h2>
- <div id="authForms">
-  <label>Email Address</label><input id="email" type="email" autocomplete="email" placeholder="আপনার ইমেইল">
-  <label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="কমপক্ষে ৬ অক্ষর">
-  <div class="row">
-   <button onclick="emailLogin()">Login</button>
-   <button class="green" onclick="emailRegister()">Create Account</button>
+<!-- Dashboard is hidden until Firebase confirms a signed-in user -->
+<main id="dashboard" class="container hidden">
+ <section class="card">
+  <div class="row" style="align-items:center">
+   <div style="flex:2"><h2>Smart CCTV AI Dashboard</h2><p class="muted" id="welcomeUser">Welcome</p></div>
+   <button class="red" onclick="logout()">Logout</button>
   </div>
-  <button class="google" onclick="googleLogin()">G Continue with Google</button>
-  <button class="gray" onclick="resetPassword()">Forgot Password?</button>
-  <p class="muted">এটি আপনার ওয়েবসাইটের Firebase অ্যাকাউন্ট। DMSS-এর পাসওয়ার্ড এখানে দেবেন না।</p>
- </div>
- <div id="signedInBox" class="hidden">
-  <p class="success" id="signedInEmail"></p>
-  <button class="red" onclick="logout()">Logout</button>
- </div>
- <p id="authMessage" class="statusline" aria-live="polite"></p>
-</section>
+  <div class="notice">আপনি লগইন করেছেন। এখানে সর্বোচ্চ ১০টি ক্যামেরা যোগ করতে পারবেন। Camera slot যোগ করা মানেই ভিডিও সংযুক্ত হওয়া নয়—প্রকৃত IP CCTV ভিডিওর জন্য নিরাপদ stream gateway প্রয়োজন।</div>
+ </section>
 
-<section class="card hidden" id="scanner">
- <h2>📷 DMSS QR Code Scanner</h2>
- <p class="muted">QR স্ক্যান করলে তথ্য শুধু এই ব্রাউজারে দেখা যাবে। স্ক্যানের ফলাফল কাউকে পাঠানো হবে না। সংবেদনশীল QR কোড স্ক্যান/শেয়ার করার আগে সতর্ক থাকুন।</p>
- <div id="reader"></div>
- <button class="green" onclick="startScan()">Start Scanner</button>
- <button class="gray" onclick="stopScan()">Stop Scanner</button>
- <div id="qrResult"><h3 class="success">✓ QR Code Read</h3><p id="qrData"></p><button onclick="hideQR()">Clear QR Result</button></div>
- <p class="muted">QR স্ক্যান করা মানেই DMSS ডিভাইসের ভিডিও অ্যাক্সেস পাওয়া নয়। এর জন্য নির্মাতার অনুমোদিত ডিভাইস/API বা ভিডিও স্ট্রিম সংযোগ প্রয়োজন।</p>
-</section>
+ <section class="card">
+  <div class="row">
+   <div style="flex:2"><h2>📹 My Cameras</h2><p class="muted" id="cameraCount">0 / 10 cameras added</p></div>
+   <button class="green" id="addCameraBtn" onclick="showAddCamera()">＋ Add Camera</button>
+  </div>
+  <div id="cameraGrid" class="grid"></div>
+  <div id="addCameraPanel" class="notice hidden" style="margin-top:13px">
+   <h3>Add a Camera</h3>
+   <label>Camera Name</label><input id="newCameraName" placeholder="যেমন: Front Gate">
+   <label>Camera Type</label>
+   <select id="newCameraType">
+    <option value="ip">IP CCTV / DVR / NVR</option>
+    <option value="webcam">USB Webcam</option>
+    <option value="dmss">DMSS Device (integration pending)</option>
+   </select>
+   <button class="green" onclick="addCamera()">Save Camera Slot</button>
+   <button class="gray" onclick="hideAddCamera()">Cancel</button>
+   <p class="muted">এখানে এখন ক্যামেরার নাম ও ধরন সংরক্ষণ হবে। RTSP URL বা ক্যামেরার পাসওয়ার্ড এই পাবলিক HTML-এ দেবেন না।</p>
+  </div>
+ </section>
 
-<section class="card">
- <h2>📹 Camera Dashboard</h2>
- <p class="muted">USB Webcam এখন সরাসরি পরীক্ষা করা যাবে। IP CCTV-এর জন্য নিরাপদ ভিডিও ব্রিজ/স্ট্রিম সার্ভার প্রয়োজন।</p>
- <div class="grid">
-  <div class="camera"><div class="camicon">📹</div><h3>USB Webcam</h3><div class="camstatus" id="webcamStatus">● Not Connected</div></div>
-  <div class="camera"><div class="camicon">🌐</div><h3>IP CCTV / DVR</h3><div class="camstatus" id="ipStatus">● Not Connected</div></div>
- </div>
-</section>
+ <section class="card">
+  <h2>🔗 DMSS Device Connection</h2>
+  <p class="muted">DMSS QR Code দিয়ে ডিভাইস শেয়ার করার সুবিধা আছে। তবে DMSS-এর sharing QR স্ক্যান করলেই এই ওয়েবসাইট ভিডিও অ্যাক্সেস পাবে না।</p>
+  <div class="notice">
+   <b>DMSS-এর সহজ Device Sharing পদ্ধতি:</b><br>
+   ১. যে ফোনে আপনার DMSS ক্যামেরা যুক্ত আছে, সেখানে DMSS খুলুন।<br>
+   ২. Devices তালিকায় ক্যামেরা/DVR-এর পাশের তিন ডট বা Device Details খুলুন।<br>
+   ৩. Device Sharing নির্বাচন করুন।<br>
+   ৪. যাকে শেয়ার করবেন তার DMSS account অথবা তার DMSS QR Code ব্যবহার করুন।<br>
+   ৫. প্রয়োজনীয় permission নির্বাচন করে Share/OK দিন।<br><br>
+   <b>মনে রাখবেন:</b> এটি অন্য DMSS অ্যাকাউন্টকে DMSS-এর ভেতরে ক্যামেরা দেখার অনুমতি দেয়; তৃতীয় পক্ষের ওয়েবসাইটে সরাসরি ভিডিও API দেয় না।
+  </div>
+  <button class="green" onclick="openScanner()">📷 Open QR Scanner</button>
+  <button class="gray" onclick="openDMSS()">Open DMSS App</button>
+  <div id="scannerPanel" class="hidden" style="margin-top:12px">
+   <div id="reader"></div>
+   <button class="green" onclick="startScan()">Start Scanner</button>
+   <button class="gray" onclick="stopScan()">Stop Scanner</button>
+   <p id="qrMessage" class="statusline"></p>
+  </div>
+  <p class="muted">ওয়েবসাইটে লাইভ ভিডিও আনতে DVR/NVR-এর RTSP/ONVIF বা Dahua-এর অনুমোদিত integration এবং server-side video gateway লাগবে।</p>
+ </section>
 
-<section class="card">
- <h2>🎥 USB Webcam Live & AI Pose Detection</h2>
- <p class="muted">Start Camera চাপলে ব্রাউজার ক্যামেরার অনুমতি চাইবে। ভিডিও ও Pose Analysis এই ডিভাইসের ব্রাউজারেই চলবে।</p>
- <div class="video-wrap">
-  <video id="webcam" autoplay playsinline muted></video>
-  <canvas id="poseCanvas"></canvas>
- </div>
- <div class="row">
-  <button class="green" id="startCameraBtn" onclick="startWebcam()">Start Camera</button>
-  <button class="gray" onclick="stopWebcam()">Stop Camera</button>
-  <button onclick="startPoseDetection()" id="startAI" disabled>Start Body Detection</button>
- </div>
- <p class="statusline" id="aiStatus">AI Model এখনো চালু হয়নি।</p>
- <div class="notice">এই Pose Detection মানুষের শরীরের keypoints (যেমন কাঁধ, কনুই, হাঁটু) শনাক্ত করে। এটি নিজে থেকে পরিচয় শনাক্ত করে না, এবং CCTV/DVR-এর সব ধরনের ভিডিও ইনপুট এখনো যুক্ত নয়।</div>
-</section>
+ <section class="card">
+  <h2>📷 USB Webcam</h2>
+  <p class="muted">কম্পিউটার/ফোনের ব্রাউজার ক্যামেরা অনুমতি দিলে USB Webcam বা built-in camera থেকে লাইভ ভিডিও দেখা যাবে।</p>
+  <div class="video-wrap">
+   <video id="webcam" autoplay playsinline muted></video>
+   <canvas id="poseCanvas"></canvas>
+  </div>
+  <button class="green" onclick="startWebcam()">Start Webcam</button>
+  <button class="gray" onclick="stopWebcam()">Stop Webcam</button>
+  <button id="startAIButton" onclick="startPoseDetection()" disabled>Start Body Detection</button>
+  <p class="statusline" id="webcamStatus">● Webcam not connected</p>
+  <p class="statusline" id="aiStatus">AI detection বন্ধ আছে।</p>
+ </section>
 
-<section class="card">
- <h2>🧠 AI Detection Status</h2>
- <div class="grid">
-  <div class="feature"><div class="camicon">🧍</div><h3>Human / Pose</h3><p class="muted" id="humanResult">Waiting for camera</p></div>
-  <div class="feature"><div class="camicon">🦴</div><h3>Body Keypoints</h3><p class="muted" id="keypointResult">Not started</p></div>
-  <div class="feature"><div class="camicon">🚶</div><h3>Movement</h3><p class="muted" id="movementResult">Waiting for movement</p></div>
-  <div class="feature"><div class="camicon">🆔</div><h3>Tracking</h3><p class="muted">Single-camera pose tracking preview</p></div>
- </div>
- <p class="muted">এটি পরীক্ষামূলক pose/movement detection। Animal, vehicle, age বা gender detection এতে অন্তর্ভুক্ত নয়।</p>
-</section>
+ <section class="card">
+  <h2>🧠 AI Body Movement Analysis</h2>
+  <div class="grid">
+   <div class="feature"><div class="camicon">🧍</div><h3>Human Pose</h3><p class="muted" id="humanResult">Waiting for video</p></div>
+   <div class="feature"><div class="camicon">🦴</div><h3>Body Keypoints</h3><p class="muted" id="keypointResult">Not started</p></div>
+   <div class="feature"><div class="camicon">🚶</div><h3>Movement</h3><p class="muted" id="movementResult">Waiting for movement</p></div>
+  </div>
+  <p class="muted">এই প্রাথমিক AI মডেল Webcam-এর একজন মানুষের pose/keypoints ও নড়াচড়া বিশ্লেষণ করে। এটি পরিচয় শনাক্ত করে না এবং এখনো IP CCTV feed বিশ্লেষণ করে না।</p>
+ </section>
+</main>
 
-<section class="card">
- <h2>IP CCTV Connection</h2>
- <p class="muted">IP CCTV/DVR/NVR সরাসরি ব্রাউজারে RTSP দিয়ে চালানো যায় না। নিরাপদভাবে RTSP-to-WebRTC/HLS gateway বা নির্মাতার অনুমোদিত API দিয়ে ভিডিও ওয়েবসাইটে আনতে হবে।</p>
- <div class="notice">ক্যামেরার username/password বা RTSP URL এই পাবলিক HTML ফাইলে লিখবেন না। এগুলো নিরাপদ সার্ভারে রাখতে হবে।</div>
- <p id="connection" class="warning">● IP CCTV Gateway Not Connected</p>
-</section>
-
-</div>
-<footer>CCTV BODY DETECTION · INFINITY WORLD · VERSION 2.0</footer>
+<footer>CCTV BODY DETECTION · INFINITY WORLD · VERSION 3.0</footer>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import {
- getAuth, onAuthStateChanged, signInWithEmailAndPassword,
- createUserWithEmailAndPassword, GoogleAuthProvider,
- signInWithPopup, signInWithRedirect, getRedirectResult,
- sendPasswordResetEmail, signOut
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,sendPasswordResetEmail,signOut} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
-const firebaseConfig = {
- apiKey: "AIzaSyA9MmcPOXEEsSA61VBrP8jMUG1lg06tAgY",
- authDomain: "cctv-body-detection.firebaseapp.com",
- projectId: "cctv-body-detection",
- storageBucket: "cctv-body-detection.firebasestorage.app",
- messagingSenderId: "796354415395",
- appId: "1:796354415395:web:65baf03c6d3b6cabe05a96",
- measurementId: "G-8G9Q4T38XF"
+const firebaseConfig={
+ apiKey:"AIzaSyA9MmcPOXEEsSA61VBrP8jMUG1lg06tAgY",
+ authDomain:"cctv-body-detection.firebaseapp.com",
+ projectId:"cctv-body-detection",
+ storageBucket:"cctv-body-detection.firebasestorage.app",
+ messagingSenderId:"796354415395",
+ appId:"1:796354415395:web:65baf03c6d3b6cabe05a96",
+ measurementId:"G-8G9Q4T38XF"
 };
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-const $ = id => document.getElementById(id);
-function authMsg(message, isError=false){
- $("authMessage").textContent = message;
- $("authMessage").className = "statusline " + (isError ? "danger" : "success");
+const app=initializeApp(firebaseConfig),auth=getAuth(app),googleProvider=new GoogleAuthProvider();
+const $=id=>document.getElementById(id);
+function message(t,error=false){$("authMessage").textContent=t;$("authMessage").className="statusline "+(error?"danger":"success")}
+function errText(e){
+ const map={"auth/invalid-email":"ইমেইল ঠিকানা সঠিক নয়।","auth/user-not-found":"এই ইমেইলে অ্যাকাউন্ট পাওয়া যায়নি।","auth/wrong-password":"পাসওয়ার্ড সঠিক নয়।","auth/invalid-credential":"ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।","auth/email-already-in-use":"এই ইমেইল দিয়ে অ্যাকাউন্ট আগে থেকেই আছে।","auth/weak-password":"পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন।","auth/unauthorized-domain":"Firebase Authentication → Settings → Authorized domains-এ আপনার GitHub Pages domain যোগ করুন।","auth/operation-not-allowed":"Firebase Console-এ Email/Password ও Google provider চালু করুন।","auth/popup-closed-by-user":"Google Login popup বন্ধ করা হয়েছে।","auth/network-request-failed":"ইন্টারনেট সংযোগ পরীক্ষা করুন।"};
+ return map[e.code]||("সমস্যা: "+(e.message||e.code||"Unknown"));
 }
-function friendlyError(error){
- const code = error?.code || "";
- const messages = {
-  "auth/invalid-email":"ইমেইল ঠিকানা সঠিক নয়।",
-  "auth/user-not-found":"এই ইমেইলে কোনো অ্যাকাউন্ট পাওয়া যায়নি।",
-  "auth/wrong-password":"পাসওয়ার্ড সঠিক নয়।",
-  "auth/invalid-credential":"ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।",
-  "auth/email-already-in-use":"এই ইমেইল দিয়ে আগে অ্যাকাউন্ট তৈরি হয়েছে।",
-  "auth/weak-password":"পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন।",
-  "auth/popup-closed-by-user":"Google Login উইন্ডো বন্ধ করা হয়েছে।",
-  "auth/unauthorized-domain":"Firebase Authentication-এর Authorized domains-এ আপনার GitHub Pages domain যোগ করুন।",
-  "auth/operation-not-allowed":"Firebase Console-এ এই Sign-in provider চালু করুন।",
-  "auth/network-request-failed":"ইন্টারনেট সংযোগ পরীক্ষা করুন।"
- };
- return messages[code] || ("সমস্যা হয়েছে: " + (error?.message || code || "Unknown error"));
-}
-window.emailLogin = async function(){
- const email=$("email").value.trim(), password=$("password").value;
- if(!email || !password) return authMsg("ইমেইল ও পাসওয়ার্ড লিখুন।",true);
- try{ await signInWithEmailAndPassword(auth,email,password); authMsg("সফলভাবে লগইন হয়েছে।"); }
- catch(e){ authMsg(friendlyError(e),true); }
-};
-window.emailRegister = async function(){
- const email=$("email").value.trim(), password=$("password").value;
- if(!email || !password) return authMsg("ইমেইল ও পাসওয়ার্ড লিখুন।",true);
- if(password.length<6) return authMsg("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।",true);
- try{ await createUserWithEmailAndPassword(auth,email,password); authMsg("অ্যাকাউন্ট তৈরি হয়েছে এবং লগইন সম্পন্ন।"); }
- catch(e){ authMsg(friendlyError(e),true); }
-};
-window.googleLogin = async function(){
- try{ await signInWithPopup(auth,provider); authMsg("Google দিয়ে লগইন সফল হয়েছে।"); }
- catch(e){
-  if(e.code==="auth/popup-blocked" || e.code==="auth/cancelled-popup-request"){
-   try{ await signInWithRedirect(auth,provider); }catch(err){authMsg(friendlyError(err),true);}
-  } else authMsg(friendlyError(e),true);
- }
-};
-window.resetPassword = async function(){
- const email=$("email").value.trim();
- if(!email) return authMsg("আগে Email Address লিখুন।",true);
- try{await sendPasswordResetEmail(auth,email);authMsg("পাসওয়ার্ড রিসেট লিংক ইমেইলে পাঠানো হয়েছে।");}
- catch(e){authMsg(friendlyError(e),true);}
-};
-window.logout = async function(){
- try{await signOut(auth);authMsg("লগআউট সম্পন্ন হয়েছে।");}
- catch(e){authMsg(friendlyError(e),true);}
-};
+window.emailLogin=async()=>{let e=$("email").value.trim(),p=$("password").value;if(!e||!p)return message("ইমেইল ও পাসওয়ার্ড লিখুন।",true);try{await signInWithEmailAndPassword(auth,e,p)}catch(x){message(errText(x),true)}};
+window.emailRegister=async()=>{let e=$("email").value.trim(),p=$("password").value;if(!e||!p)return message("ইমেইল ও পাসওয়ার্ড লিখুন।",true);if(p.length<6)return message("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।",true);try{await createUserWithEmailAndPassword(auth,e,p)}catch(x){message(errText(x),true)}};
+window.googleLogin=async()=>{try{await signInWithPopup(auth,googleProvider)}catch(e){if(e.code==="auth/popup-blocked"){try{await signInWithRedirect(auth,googleProvider)}catch(x){message(errText(x),true)}}else message(errText(e),true)}};
+window.resetPassword=async()=>{let e=$("email").value.trim();if(!e)return message("আগে ইমেইল লিখুন।",true);try{await sendPasswordResetEmail(auth,e);message("Password reset link ইমেইলে পাঠানো হয়েছে।")}catch(x){message(errText(x),true)}};
+window.logout=async()=>{stopWebcam();try{await signOut(auth)}catch(e){message(errText(e),true)}};
 onAuthStateChanged(auth,user=>{
- if(user){
-  $("userState").textContent="Logged in: "+(user.email || user.displayName || "Google user");
-  $("signedInEmail").textContent="Signed in as: "+(user.email || user.displayName || "Google user");
-  $("authForms").classList.add("hidden");
-  $("signedInBox").classList.remove("hidden");
-  $("topStatus").textContent="● ACCOUNT CONNECTED";
- }else{
-  $("userState").textContent="আপনি এখনো লগইন করেননি।";
-  $("authForms").classList.remove("hidden");
-  $("signedInBox").classList.add("hidden");
-  $("topStatus").textContent="● SYSTEM READY";
- }
+ $("loginScreen").classList.toggle("hidden",!!user);
+ $("dashboard").classList.toggle("hidden",!user);
+ $("topStatus").textContent=user?"● ACCOUNT CONNECTED":"● SECURE LOGIN";
+ if(user){$("welcomeUser").textContent="Signed in as: "+(user.email||user.displayName||"Google account");renderCameras()}
 });
-getRedirectResult(auth).catch(e=>authMsg(friendlyError(e),true));
+getRedirectResult(auth).catch(e=>message(errText(e),true));
 
-window.showPanel = function(id){
- ["scanner","authPanel"].forEach(x=>$(x).classList.add("hidden"));
- $(id).classList.remove("hidden");
- $(id).scrollIntoView({behavior:"smooth",block:"start"});
+let cameras=[];
+window.showAddCamera=()=>{$("addCameraPanel").classList.remove("hidden");$("newCameraName").focus()};
+window.hideAddCamera=()=>$("addCameraPanel").classList.add("hidden");
+window.addCamera=()=>{
+ if(cameras.length>=10)return alert("সর্বোচ্চ ১০টি ক্যামেরা যোগ করা যাবে।");
+ const name=$("newCameraName").value.trim();if(!name)return alert("ক্যামেরার নাম লিখুন।");
+ cameras.push({id:Date.now()+Math.random(),name,type:$("newCameraType").value});
+ $("newCameraName").value="";hideAddCamera();renderCameras();
 };
-window.openScanner=()=>showPanel("scanner");
-window.openDMSS=()=>window.open("https://play.google.com/store/apps/details?id=com.mm.android.DMSS","_blank");
-
-let qrScanner=null, scanning=false;
-window.startScan=async function(){
- if(scanning)return;
- try{
-  if(!qrScanner) qrScanner=new Html5Qrcode("reader");
-  await qrScanner.start({facingMode:"environment"},{fps:10,qrbox:{width:230,height:230}},
-   decodedText=>{
-    $("qrData").textContent="QR Code পড়া হয়েছে। গোপনীয়তার জন্য সম্পূর্ণ QR তথ্য এখানে দেখানো হচ্ছে না।";
-    $("qrResult").style.display="block";
-    window.stopScan();
-   },()=>{});
-  scanning=true;
- }catch(e){alert("QR Camera Error: "+e.message);}
-};
-window.stopScan=async function(){
- if(qrScanner && scanning){try{await qrScanner.stop();}catch(e){} scanning=false;}
-};
-window.hideQR=()=>{$("qrResult").style.display="none";$("qrData").textContent="";};
-
-let webcamStream=null, poseDetector=null, detecting=false, lastCenter=null, movementCount=0;
-const video=$("webcam"), canvas=$("poseCanvas"), ctx=canvas.getContext("2d");
-window.startWebcam=async function(){
- try{
-  if(!navigator.mediaDevices?.getUserMedia) throw new Error("এই ব্রাউজার/পেজে Camera API নেই। HTTPS পেজ ব্যবহার করুন।");
-  webcamStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});
-  video.srcObject=webcamStream;
-  await video.play();
-  $("webcamStatus").textContent="● Connected";
-  $("webcamStatus").className="camstatus success";
-  $("startAI").disabled=false;
-  $("aiStatus").textContent="ক্যামেরা চালু। এখন Start Body Detection চাপুন।";
- }catch(e){$("aiStatus").textContent="Camera Error: "+e.message;}
-};
-window.stopWebcam=function(){
- detecting=false;
- if(webcamStream){webcamStream.getTracks().forEach(t=>t.stop());webcamStream=null;}
- video.srcObject=null;
- ctx.clearRect(0,0,canvas.width,canvas.height);
- $("webcamStatus").textContent="● Not Connected";
- $("webcamStatus").className="camstatus";
- $("startAI").disabled=true;
- $("aiStatus").textContent="Camera বন্ধ করা হয়েছে।";
- $("humanResult").textContent="Waiting for camera";
-};
-async function loadPoseModel(){
- if(poseDetector)return poseDetector;
- $("aiStatus").textContent="AI Pose Model লোড হচ্ছে… প্রথমবার ইন্টারনেট লাগবে।";
- await tf.setBackend("webgl");
- await tf.ready();
- poseDetector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{
-  modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+window.removeCamera=id=>{cameras=cameras.filter(c=>c.id!==id);renderCameras()};
+function renderCameras(){
+ $("cameraCount").textContent=cameras.length+" / 10 cameras added";
+ $("addCameraBtn").disabled=cameras.length>=10;
+ $("cameraGrid").innerHTML="";
+ cameras.forEach((c,i)=>{
+  const div=document.createElement("div");div.className="camera";
+  const typeLabel=c.type==="ip"?"IP CCTV / DVR":c.type==="dmss"?"DMSS Device":"USB Webcam";
+  const status=c.type==="webcam"?"Ready to request permission":c.type==="dmss"?"Integration required":"Stream gateway required";
+  div.innerHTML=`<div class="camicon">${c.type==="webcam"?"📷":c.type==="dmss"?"🔗":"📹"}</div><h3></h3><p class="muted"></p><div class="camstatus"></div><div class="camera-actions"><button class="gray" onclick="removeCamera(${c.id})">Remove</button></div>`;
+  div.querySelector("h3").textContent=c.name||("Camera "+(i+1));
+  div.querySelector("p").textContent=typeLabel;div.querySelector(".camstatus").textContent="● "+status;
+  $("cameraGrid").appendChild(div);
  });
- return poseDetector;
 }
-window.startPoseDetection=async function(){
- if(!webcamStream)return $("aiStatus").textContent="আগে Start Camera চাপুন।";
+
+window.openScanner=()=>{$("scannerPanel").classList.remove("hidden");$("scannerPanel").scrollIntoView({behavior:"smooth"})};
+window.openDMSS=()=>window.open("https://play.google.com/store/apps/details?id=com.mm.android.DMSS","_blank");
+let qr=null,scanning=false;
+window.startScan=async()=>{
+ try{if(!qr)qr=new Html5Qrcode("reader");if(scanning)return;
+ await qr.start({facingMode:"environment"},{fps:10,qrbox:{width:220,height:220}},()=>{
+  $("qrMessage").textContent="QR code পড়া হয়েছে। নিরাপত্তার জন্য কনটেন্ট দেখানো বা সংরক্ষণ করা হয়নি। মনে রাখবেন, QR স্ক্যান করলেই ওয়েবসাইটে CCTV stream access হয় না।";
+  window.stopScan();
+ },()=>{});scanning=true;
+ }catch(e){$("qrMessage").textContent="Scanner error: "+e.message}
+};
+window.stopScan=async()=>{if(qr&&scanning){try{await qr.stop()}catch(e){}scanning=false}};
+
+let stream=null,detector=null,detecting=false,lastCenter=null;
+const video=$("webcam"),canvas=$("poseCanvas"),ctx=canvas.getContext("2d");
+window.startWebcam=async()=>{
+ try{stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});video.srcObject=stream;await video.play();$("webcamStatus").textContent="● Webcam connected";$("webcamStatus").className="statusline success";$("startAIButton").disabled=false}
+ catch(e){$("webcamStatus").textContent="Camera error: "+e.message}
+};
+window.stopWebcam=()=>{
+ detecting=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}video.srcObject=null;
+ ctx.clearRect(0,0,canvas.width,canvas.height);$("webcamStatus").textContent="● Webcam not connected";$("startAIButton").disabled=true;$("aiStatus").textContent="AI detection বন্ধ আছে।";$("humanResult").textContent="Waiting for video";
+};
+async function loadDetector(){
+ if(detector)return detector;
+ $("aiStatus").textContent="AI model লোড হচ্ছে; প্রথমবার ইন্টারনেট প্রয়োজন।";
+ await tf.setBackend("webgl");await tf.ready();
+ detector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
+ return detector;
+}
+window.startPoseDetection=async()=>{
+ if(!stream)return $("aiStatus").textContent="আগে Start Webcam চাপুন।";
  if(detecting)return;
- try{
-  await loadPoseModel();
-  detecting=true;
-  $("aiStatus").textContent="AI Body Detection চালু হয়েছে।";
-  detectFrame();
- }catch(e){$("aiStatus").textContent="AI Model Error: "+e.message;}
+ try{await loadDetector();detecting=true;$("aiStatus").textContent="Body Detection চালু হয়েছে।";detectFrame()}catch(e){$("aiStatus").textContent="AI model error: "+e.message}
 };
 async function detectFrame(){
- if(!detecting || !webcamStream)return;
+ if(!detecting||!stream)return;
  if(video.readyState>=2){
   try{
-   const poses=await poseDetector.estimatePoses(video);
-   canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-   ctx.clearRect(0,0,canvas.width,canvas.height);
-   if(poses.length && poses[0].keypoints){
-    const points=poses[0].keypoints.filter(p=>p.score>0.3);
-    $("humanResult").textContent="Human pose detected";
-    $("keypointResult").textContent=points.length+" keypoints detected";
-    const xs=points.map(p=>p.x), ys=points.map(p=>p.y);
-    const center={x:xs.reduce((a,b)=>a+b,0)/xs.length,y:ys.reduce((a,b)=>a+b,0)/ys.length};
-    if(lastCenter){
-     const distance=Math.hypot(center.x-lastCenter.x,center.y-lastCenter.y);
-     if(distance>12) movementCount++;
-     $("movementResult").textContent=distance>12?"Movement detected":"Low movement";
+   const poses=await detector.estimatePoses(video);canvas.width=video.videoWidth;canvas.height=video.videoHeight;ctx.clearRect(0,0,canvas.width,canvas.height);
+   if(poses.length&&poses[0].keypoints){
+    const pts=poses[0].keypoints.filter(p=>p.score>.3);$("humanResult").textContent="Human pose detected";$("keypointResult").textContent=pts.length+" keypoints";
+    if(pts.length){let cx=pts.reduce((s,p)=>s+p.x,0)/pts.length,cy=pts.reduce((s,p)=>s+p.y,0)/pts.length;
+     if(lastCenter){let d=Math.hypot(cx-lastCenter.x,cy-lastCenter.y);$("movementResult").textContent=d>12?"Movement detected":"Low movement"}
+     lastCenter={x:cx,y:cy};
     }
-    lastCenter=center;
-    const adjacent=poseDetection.util.getAdjacentPairs(poseDetection.SupportedModels.MoveNet);
-    ctx.lineWidth=Math.max(2,canvas.width/240);ctx.strokeStyle="#22c55e";
-    adjacent.forEach(([a,b])=>{
-     const p1=poses[0].keypoints[a],p2=poses[0].keypoints[b];
-     if(p1.score>0.3&&p2.score>0.3){ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();}
-    });
-    ctx.fillStyle="#facc15";
-    points.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,Math.max(3,canvas.width/180),0,Math.PI*2);ctx.fill();});
-   }else{
-    $("humanResult").textContent="No person detected";
-    $("keypointResult").textContent="0 keypoints";
-    $("movementResult").textContent="No movement";
-    lastCenter=null;
-   }
-  }catch(e){$("aiStatus").textContent="Detection Error: "+e.message;detecting=false;return;}
+    ctx.strokeStyle="#22c55e";ctx.lineWidth=Math.max(2,canvas.width/240);
+    poseDetection.util.getAdjacentPairs(poseDetection.SupportedModels.MoveNet).forEach(([a,b])=>{let p=poses[0].keypoints[a],q=poses[0].keypoints[b];if(p.score>.3&&q.score>.3){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}});
+    ctx.fillStyle="#facc15";pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,Math.max(3,canvas.width/180),0,Math.PI*2);ctx.fill()});
+   }else{$("humanResult").textContent="No person detected";$("keypointResult").textContent="0 keypoints";$("movementResult").textContent="No movement";lastCenter=null}
+  }catch(e){$("aiStatus").textContent="Detection error: "+e.message;detecting=false;return}
  }
  requestAnimationFrame(detectFrame);
 }
