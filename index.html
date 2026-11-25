@@ -19,17 +19,18 @@ h2{font-size:19px;margin:0 0 12px}h3{font-size:15px;margin:8px 0}p{line-height:1
 button{background:#2563eb;color:white;border:0;padding:11px 14px;border-radius:8px;margin:4px 3px 4px 0;font-weight:bold;cursor:pointer}
 button:disabled{opacity:.45;cursor:not-allowed}.green{background:#059669}.gray{background:#475569}.google{background:#fff;color:#222}.red{background:#b91c1c}
 input,select{width:100%;padding:12px;background:#091525;color:white;border:1px solid #40536b;border-radius:8px;margin:7px 0 13px}
-label{font-size:13px;color:#cbd5e1}.hidden{display:none!important}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
+label{font-size:13px;color:#cbd5e1}.hidden{display:none!important}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px}
 .camera,.feature{background:#091525;border:1px solid #344b68;border-radius:11px;padding:14px;text-align:center;min-width:0}
 .camera .camicon,.feature .camicon{font-size:28px}.camstatus{font-size:12px;color:#fbbf24}.success{color:#4ade80}.warning{color:#fbbf24}.danger{color:#f87171}
 .notice{background:#0b1a2d;border-left:3px solid #60a5fa;padding:11px;border-radius:7px;font-size:13px;color:#cbd5e1;line-height:1.55}
 #reader{max-width:400px;margin:12px auto;overflow:hidden;border-radius:10px;background:#fff}#reader video{max-width:100%!important}
-#qrResult{display:none;background:#091525;padding:12px;border-radius:9px;overflow-wrap:anywhere}
 .video-wrap{position:relative;background:#020617;border-radius:12px;overflow:hidden;min-height:160px}
 #webcam{display:block;width:100%;max-height:500px;object-fit:contain}#poseCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .statusline{font-size:13px;color:#cbd5e1}.camera-actions{margin-top:8px}.camera-actions button{font-size:12px;padding:8px}
 .authbox{max-width:440px;margin:5vh auto}.brandmark{text-align:center;font-size:42px;color:#60a5fa}.authbox h1{text-align:center;font-size:22px}.authbox .muted{text-align:center}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}.auth-tabs button{margin:0;background:#263b58;color:#cbd5e1}.auth-tabs button.active{background:#2563eb;color:white}
+.google{width:100%;margin:5px 0 10px}.primary-auth{width:100%;margin:5px 0 10px}
 footer{text-align:center;padding:22px;color:#8094ac;font-size:12px}
 </style>
 </head>
@@ -39,25 +40,42 @@ footer{text-align:center;padding:22px;color:#8094ac;font-size:12px}
  <div class="topright" id="topStatus">● SECURE LOGIN</div>
 </header>
 
-<!-- Login is the only screen shown before authentication -->
 <main id="loginScreen" class="container">
  <section class="card authbox">
   <div class="brandmark">◉</div>
   <h1>CCTV Body Detection</h1>
   <p class="muted">Secure Camera Monitoring & AI Movement Analysis</p>
-  <h2>Account Login</h2>
-  <label>Email Address</label><input id="email" type="email" autocomplete="username" placeholder="আপনার ইমেইল">
-  <label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="পাসওয়ার্ড">
-  <button style="width:100%" onclick="emailLogin()">Login</button>
-  <button class="green" style="width:100%" onclick="emailRegister()">Create Account</button>
-  <button class="google" style="width:100%" onclick="googleLogin()">G Continue with Google</button>
-  <button class="gray" style="width:100%" onclick="resetPassword()">Forgot Password?</button>
+
+  <div class="auth-tabs">
+   <button id="loginTab" class="active" type="button" onclick="showAuthMode('login')">Login</button>
+   <button id="signupTab" type="button" onclick="showAuthMode('signup')">Create Account</button>
+  </div>
+
+  <div id="loginForm">
+   <h2>Account Login</h2>
+   <label>Email Address</label><input id="loginEmail" type="email" autocomplete="username" placeholder="আপনার ইমেইল">
+   <label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="পাসওয়ার্ড">
+   <button class="primary-auth" onclick="emailLogin()">Login</button>
+   <button class="google" onclick="googleLogin()">G&nbsp; Continue with Google</button>
+   <button class="gray" style="width:100%;margin:0" onclick="resetPassword()">Forgot Password?</button>
+  </div>
+
+  <div id="signupForm" class="hidden">
+   <h2>Create New Account</h2>
+   <label>Account Name</label><input id="signupName" type="text" autocomplete="name" maxlength="60" placeholder="আপনার নাম">
+   <label>Email Address</label><input id="signupEmail" type="email" autocomplete="email" placeholder="আপনার ইমেইল">
+   <label>Password</label><input id="signupPassword" type="password" autocomplete="new-password" placeholder="কমপক্ষে ৮ অক্ষর">
+   <label>Confirm Password</label><input id="signupConfirmPassword" type="password" autocomplete="new-password" placeholder="পাসওয়ার্ড আবার লিখুন">
+   <p class="muted">নিরাপত্তার জন্য পাসওয়ার্ডে কমপক্ষে ৮ অক্ষর, একটি বড় হাতের অক্ষর, একটি ছোট হাতের অক্ষর, একটি সংখ্যা ও একটি বিশেষ চিহ্ন রাখুন।</p>
+   <button class="green primary-auth" onclick="emailRegister()">Create Account</button>
+   <button class="google" onclick="googleLogin()">G&nbsp; Sign up with Google</button>
+  </div>
+
   <p id="authMessage" class="statusline" aria-live="polite"></p>
-  <p class="muted">এটি আপনার CCTV ওয়েবসাইটের Firebase অ্যাকাউন্ট। DMSS-এর পাসওয়ার্ড এখানে দেবেন না।</p>
+  <p class="muted">Google দিয়ে প্রথমবার Continue করলে Firebase-এ স্বয়ংক্রিয়ভাবে অ্যাকাউন্ট তৈরি হবে। ইমেইল-পাসওয়ার্ড অ্যাকাউন্টে ইমেইল ভেরিফিকেশন প্রয়োজন। DMSS-এর পাসওয়ার্ড এখানে দেবেন না।</p>
  </section>
 </main>
 
-<!-- Dashboard is hidden until Firebase confirms a signed-in user -->
 <main id="dashboard" class="container hidden">
  <section class="card">
   <div class="row" style="align-items:center">
@@ -80,25 +98,21 @@ footer{text-align:center;padding:22px;color:#8094ac;font-size:12px}
    <select id="newCameraType">
     <option value="ip">IP CCTV / DVR / NVR</option>
     <option value="webcam">USB Webcam</option>
-    <option value="dmss">DMSS Device (integration pending)</option>
+    <option value="dmss">DMSS Device</option>
    </select>
    <button class="green" onclick="addCamera()">Save Camera Slot</button>
    <button class="gray" onclick="hideAddCamera()">Cancel</button>
-   <p class="muted">এখানে এখন ক্যামেরার নাম ও ধরন সংরক্ষণ হবে। RTSP URL বা ক্যামেরার পাসওয়ার্ড এই পাবলিক HTML-এ দেবেন না।</p>
+   <p class="muted">এখানে ক্যামেরার নাম ও ধরন সংরক্ষণ হবে। RTSP URL বা ক্যামেরার পাসওয়ার্ড এই পাবলিক HTML-এ দেবেন না।</p>
   </div>
  </section>
 
  <section class="card">
   <h2>🔗 DMSS Device Connection</h2>
-  <p class="muted">DMSS QR Code দিয়ে ডিভাইস শেয়ার করার সুবিধা আছে। তবে DMSS-এর sharing QR স্ক্যান করলেই এই ওয়েবসাইট ভিডিও অ্যাক্সেস পাবে না।</p>
+  <p class="muted">DMSS QR Code স্ক্যান করলেই এই ওয়েবসাইট ভিডিও অ্যাক্সেস পাবে না।</p>
   <div class="notice">
-   <b>DMSS-এর সহজ Device Sharing পদ্ধতি:</b><br>
-   ১. যে ফোনে আপনার DMSS ক্যামেরা যুক্ত আছে, সেখানে DMSS খুলুন।<br>
-   ২. Devices তালিকায় ক্যামেরা/DVR-এর পাশের তিন ডট বা Device Details খুলুন।<br>
-   ৩. Device Sharing নির্বাচন করুন।<br>
-   ৪. যাকে শেয়ার করবেন তার DMSS account অথবা তার DMSS QR Code ব্যবহার করুন।<br>
-   ৫. প্রয়োজনীয় permission নির্বাচন করে Share/OK দিন।<br><br>
-   <b>মনে রাখবেন:</b> এটি অন্য DMSS অ্যাকাউন্টকে DMSS-এর ভেতরে ক্যামেরা দেখার অনুমতি দেয়; তৃতীয় পক্ষের ওয়েবসাইটে সরাসরি ভিডিও API দেয় না।
+   <b>DMSS Device Sharing:</b><br>
+   DMSS অ্যাপে Device Sharing দিয়ে অন্য DMSS account-কে অনুমতি দেওয়া যায়। এই শেয়ারিং নিজে থেকে তৃতীয় পক্ষের ওয়েবসাইটে লাইভ ভিডিও API দেয় না।<br><br>
+   ওয়েবসাইটে লাইভ ভিডিও আনতে ক্যামেরার সমর্থিত RTSP/ONVIF বা নির্মাতার অনুমোদিত integration এবং নিরাপদ server-side video gateway প্রয়োজন।
   </div>
   <button class="green" onclick="openScanner()">📷 Open QR Scanner</button>
   <button class="gray" onclick="openDMSS()">Open DMSS App</button>
@@ -108,7 +122,6 @@ footer{text-align:center;padding:22px;color:#8094ac;font-size:12px}
    <button class="gray" onclick="stopScan()">Stop Scanner</button>
    <p id="qrMessage" class="statusline"></p>
   </div>
-  <p class="muted">ওয়েবসাইটে লাইভ ভিডিও আনতে DVR/NVR-এর RTSP/ONVIF বা Dahua-এর অনুমোদিত integration এবং server-side video gateway লাগবে।</p>
  </section>
 
  <section class="card">
@@ -136,11 +149,11 @@ footer{text-align:center;padding:22px;color:#8094ac;font-size:12px}
  </section>
 </main>
 
-<footer>CCTV BODY DETECTION · INFINITY WORLD · VERSION 3.0</footer>
+<footer>CCTV BODY DETECTION · INFINITY WORLD · VERSION 3.1</footer>
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,sendPasswordResetEmail,signOut} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,sendPasswordResetEmail,sendEmailVerification,updateProfile,signOut} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 const firebaseConfig={
  apiKey:"AIzaSyA9MmcPOXEEsSA61VBrP8jMUG1lg06tAgY",
@@ -152,22 +165,98 @@ const firebaseConfig={
  measurementId:"G-8G9Q4T38XF"
 };
 const app=initializeApp(firebaseConfig),auth=getAuth(app),googleProvider=new GoogleAuthProvider();
+googleProvider.setCustomParameters({prompt:"select_account"});
 const $=id=>document.getElementById(id);
+
 function message(t,error=false){$("authMessage").textContent=t;$("authMessage").className="statusline "+(error?"danger":"success")}
 function errText(e){
- const map={"auth/invalid-email":"ইমেইল ঠিকানা সঠিক নয়।","auth/user-not-found":"এই ইমেইলে অ্যাকাউন্ট পাওয়া যায়নি।","auth/wrong-password":"পাসওয়ার্ড সঠিক নয়।","auth/invalid-credential":"ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।","auth/email-already-in-use":"এই ইমেইল দিয়ে অ্যাকাউন্ট আগে থেকেই আছে।","auth/weak-password":"পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন।","auth/unauthorized-domain":"Firebase Authentication → Settings → Authorized domains-এ আপনার GitHub Pages domain যোগ করুন।","auth/operation-not-allowed":"Firebase Console-এ Email/Password ও Google provider চালু করুন।","auth/popup-closed-by-user":"Google Login popup বন্ধ করা হয়েছে।","auth/network-request-failed":"ইন্টারনেট সংযোগ পরীক্ষা করুন।"};
+ const map={
+ "auth/invalid-email":"ইমেইল ঠিকানা সঠিক নয়।",
+ "auth/user-not-found":"এই ইমেইলে অ্যাকাউন্ট পাওয়া যায়নি।",
+ "auth/wrong-password":"পাসওয়ার্ড সঠিক নয়।",
+ "auth/invalid-credential":"ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।",
+ "auth/email-already-in-use":"এই ইমেইল দিয়ে অ্যাকাউন্ট আগে থেকেই আছে। Login করুন।",
+ "auth/weak-password":"আরও শক্তিশালী পাসওয়ার্ড দিন।",
+ "auth/unauthorized-domain":"Firebase Authentication → Settings → Authorized domains-এ আপনার GitHub Pages domain যোগ করুন।",
+ "auth/operation-not-allowed":"Firebase Console-এ Email/Password ও Google provider চালু করুন।",
+ "auth/popup-closed-by-user":"Google Login popup বন্ধ করা হয়েছে।",
+ "auth/popup-blocked":"Popup ব্লক হয়েছে। আবার চেষ্টা করুন অথবা Google redirect ব্যবহার করুন।",
+ "auth/network-request-failed":"ইন্টারনেট সংযোগ পরীক্ষা করুন।",
+ "auth/too-many-requests":"অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।"
+ };
  return map[e.code]||("সমস্যা: "+(e.message||e.code||"Unknown"));
 }
-window.emailLogin=async()=>{let e=$("email").value.trim(),p=$("password").value;if(!e||!p)return message("ইমেইল ও পাসওয়ার্ড লিখুন।",true);try{await signInWithEmailAndPassword(auth,e,p)}catch(x){message(errText(x),true)}};
-window.emailRegister=async()=>{let e=$("email").value.trim(),p=$("password").value;if(!e||!p)return message("ইমেইল ও পাসওয়ার্ড লিখুন।",true);if(p.length<6)return message("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।",true);try{await createUserWithEmailAndPassword(auth,e,p)}catch(x){message(errText(x),true)}};
-window.googleLogin=async()=>{try{await signInWithPopup(auth,googleProvider)}catch(e){if(e.code==="auth/popup-blocked"){try{await signInWithRedirect(auth,googleProvider)}catch(x){message(errText(x),true)}}else message(errText(e),true)}};
-window.resetPassword=async()=>{let e=$("email").value.trim();if(!e)return message("আগে ইমেইল লিখুন।",true);try{await sendPasswordResetEmail(auth,e);message("Password reset link ইমেইলে পাঠানো হয়েছে।")}catch(x){message(errText(x),true)}};
+window.showAuthMode=mode=>{
+ const signup=mode==="signup";
+ $("loginForm").classList.toggle("hidden",signup);
+ $("signupForm").classList.toggle("hidden",!signup);
+ $("loginTab").classList.toggle("active",!signup);
+ $("signupTab").classList.toggle("active",signup);
+ $("authMessage").textContent="";
+};
+function strongPassword(p){return p.length>=8&&/[A-Z]/.test(p)&&/[a-z]/.test(p)&&/[0-9]/.test(p)&&/[^A-Za-z0-9]/.test(p)}
+
+window.emailLogin=async()=>{
+ const e=$("loginEmail").value.trim(),p=$("loginPassword").value;
+ if(!e||!p)return message("ইমেইল ও পাসওয়ার্ড লিখুন।",true);
+ try{
+  const result=await signInWithEmailAndPassword(auth,e,p);
+  await result.user.reload();
+  if(!result.user.emailVerified){
+   await signOut(auth);
+   message("আপনার ইমেইল এখনো Verify হয়নি। Sign up করার সময় পাঠানো verification link খুলুন।",true);
+   return;
+  }
+ }catch(x){message(errText(x),true)}
+};
+window.emailRegister=async()=>{
+ const name=$("signupName").value.trim(),e=$("signupEmail").value.trim(),p=$("signupPassword").value,confirm=$("signupConfirmPassword").value;
+ if(!name||!e||!p||!confirm)return message("নাম, ইমেইল ও দুইবার পাসওয়ার্ড লিখুন।",true);
+ if(name.length<2)return message("অ্যাকাউন্টের নাম কমপক্ষে ২ অক্ষরের দিন।",true);
+ if(!strongPassword(p))return message("পাসওয়ার্ডে ৮ অক্ষর, বড় হাতের, ছোট হাতের, সংখ্যা ও বিশেষ চিহ্ন থাকতে হবে।",true);
+ if(p!==confirm)return message("দুইটি পাসওয়ার্ড মিলছে না।",true);
+ try{
+  const result=await createUserWithEmailAndPassword(auth,e,p);
+  await updateProfile(result.user,{displayName:name});
+  await sendEmailVerification(result.user);
+  await signOut(auth);
+  showAuthMode("login");
+  $("loginEmail").value=e;
+  message("অ্যাকাউন্ট তৈরি হয়েছে। আপনার ইমেইলে পাঠানো verification link খুলে তারপর Login করুন।");
+ }catch(x){message(errText(x),true)}
+};
+window.googleLogin=async()=>{
+ try{await signInWithPopup(auth,googleProvider)}
+ catch(e){
+  if(e.code==="auth/popup-blocked"||e.code==="auth/popup-closed-by-user"){
+   try{await signInWithRedirect(auth,googleProvider)}catch(x){message(errText(x),true)}
+  }else message(errText(e),true)
+ }
+};
+window.resetPassword=async()=>{
+ const e=$("loginEmail").value.trim();
+ if(!e)return message("Login অংশে আগে আপনার ইমেইল লিখুন।",true);
+ try{await sendPasswordResetEmail(auth,e);message("Password reset link ইমেইলে পাঠানো হয়েছে।")}
+ catch(x){message(errText(x),true)}
+};
 window.logout=async()=>{stopWebcam();try{await signOut(auth)}catch(e){message(errText(e),true)}};
-onAuthStateChanged(auth,user=>{
+
+onAuthStateChanged(auth,async user=>{
+ if(user){
+  await user.reload();
+  const googleUser=user.providerData.some(p=>p.providerId==="google.com");
+  if(!user.emailVerified&&!googleUser){
+   $("loginScreen").classList.remove("hidden");$("dashboard").classList.add("hidden");
+   $("topStatus").textContent="● EMAIL VERIFICATION REQUIRED";
+   try{await signOut(auth)}catch(e){}
+   message("নিরাপত্তার জন্য ইমেইল Verify না করা পর্যন্ত Dashboard খোলা হবে না।",true);
+   return;
+  }
+ }
  $("loginScreen").classList.toggle("hidden",!!user);
  $("dashboard").classList.toggle("hidden",!user);
  $("topStatus").textContent=user?"● ACCOUNT CONNECTED":"● SECURE LOGIN";
- if(user){$("welcomeUser").textContent="Signed in as: "+(user.email||user.displayName||"Google account");renderCameras()}
+ if(user){$("welcomeUser").textContent="Signed in as: "+(user.displayName||user.email||"Google account");renderCameras()}
 });
 getRedirectResult(auth).catch(e=>message(errText(e),true));
 
@@ -187,7 +276,7 @@ function renderCameras(){
  $("cameraGrid").innerHTML="";
  cameras.forEach((c,i)=>{
   const div=document.createElement("div");div.className="camera";
-  const typeLabel=c.type==="ip"?"IP CCTV / DVR":c.type==="dmss"?"DMSS Device":"USB Webcam";
+  const typeLabel=c.type==="ip"?"IP CCTV / DVR / NVR":c.type==="dmss"?"DMSS Device":"USB Webcam";
   const status=c.type==="webcam"?"Ready to request permission":c.type==="dmss"?"Integration required":"Stream gateway required";
   div.innerHTML=`<div class="camicon">${c.type==="webcam"?"📷":c.type==="dmss"?"🔗":"📹"}</div><h3></h3><p class="muted"></p><div class="camstatus"></div><div class="camera-actions"><button class="gray" onclick="removeCamera(${c.id})">Remove</button></div>`;
   div.querySelector("h3").textContent=c.name||("Camera "+(i+1));
@@ -200,11 +289,12 @@ window.openScanner=()=>{$("scannerPanel").classList.remove("hidden");$("scannerP
 window.openDMSS=()=>window.open("https://play.google.com/store/apps/details?id=com.mm.android.DMSS","_blank");
 let qr=null,scanning=false;
 window.startScan=async()=>{
- try{if(!qr)qr=new Html5Qrcode("reader");if(scanning)return;
- await qr.start({facingMode:"environment"},{fps:10,qrbox:{width:220,height:220}},()=>{
-  $("qrMessage").textContent="QR code পড়া হয়েছে। নিরাপত্তার জন্য কনটেন্ট দেখানো বা সংরক্ষণ করা হয়নি। মনে রাখবেন, QR স্ক্যান করলেই ওয়েবসাইটে CCTV stream access হয় না।";
-  window.stopScan();
- },()=>{});scanning=true;
+ try{
+  if(!qr)qr=new Html5Qrcode("reader");if(scanning)return;
+  await qr.start({facingMode:"environment"},{fps:10,qrbox:{width:220,height:220}},()=>{
+   $("qrMessage").textContent="QR code পড়া হয়েছে। QR scan করলেই website-এ CCTV stream access হয় না। অজানা QR data প্রকাশ বা শেয়ার করবেন না।";
+   window.stopScan();
+  },()=>{});scanning=true;
  }catch(e){$("qrMessage").textContent="Scanner error: "+e.message}
 };
 window.stopScan=async()=>{if(qr&&scanning){try{await qr.stop()}catch(e){}scanning=false}};
